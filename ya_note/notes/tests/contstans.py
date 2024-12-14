@@ -1,0 +1,6 @@
+DETAIL_URl = ('notes:detail')
+LOGIN_URL = ('users:login')
+ADD_URL = ('notes:add')
+SUCCESS_URL = ('notes:success')
+EDIT_URL = ('notes:edit')
+DELETE_URL = ('notes:delete')

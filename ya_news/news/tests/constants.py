@@ -1,0 +1,7 @@
+HOME_URL = ('news:home')
+DELETE_URL = ('news:delete')
+EDIT_URL = ('news:edit')
+DETAIL_URL = ('news:detail')
+LOGIN_URL = ('users:login')
+LOGOUT_URL = ('users:logout')
+SIGNUP_URL = ('users:signup')
