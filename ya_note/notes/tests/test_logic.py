@@ -16,11 +16,12 @@ User = get_user_model()
 
 
 class TestNoteCreation(BaseTestClass):
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.form_data = {'title':cls.NOTE_TITLE,
-                         'text':cls.NOTE_TEXT}
+        cls.form_data = {'title': cls.NOTE_TITLE,
+                         'text': cls.NOTE_TEXT}
 
     def test_anonymous_user_cant_create_note(self):
         """
@@ -50,6 +51,7 @@ class TestNoteCreation(BaseTestClass):
 
 class TestSlugField(BaseTestClass):
     NEW_NOTE_TEXT = 'Новый текст заметки'
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -85,6 +87,7 @@ class TestSlugField(BaseTestClass):
 class TestNoteEditDelete(BaseTestClass):
     NEW_NOTE_TITLE = 'New title'
     NEW_NOTE_TEXT = 'New Text'
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()

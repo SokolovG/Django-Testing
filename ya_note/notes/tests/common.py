@@ -14,8 +14,6 @@ class BaseTestClass(TestCase):
     NOTE_TEXT = 'Текст заметки'
     NOTE_TITLE = 'Заметка'
     NOTE_SLUG = 'slug'
-
-
     @classmethod
     def setUpTestData(cls):
 
