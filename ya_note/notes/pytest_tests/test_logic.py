@@ -1,11 +1,10 @@
-from pytest_django.asserts import assertRedirects, assertFormError
-import pytest
-
-from pytils.translit import slugify
 from http import HTTPStatus
 
-from notes.models import Note
+from pytest_django.asserts import assertRedirects, assertFormError
+from pytils.translit import slugify
+
 from notes.forms import WARNING
+from notes.models import Note
 
 
 def test_user_can_create_note(author_client,
@@ -26,11 +25,11 @@ def test_user_can_create_note(author_client,
     assert new_note.author == author
 
 
-@pytest.mark.django_db
 def test_anonymous_user_cant_create_note(client,
                                          form_data,
                                          login_url,
-                                         add_url):
+                                         add_url,
+                                         db_auto_use):
     # Проверка на создание заметки для не авторизированного пользователя.
     url = add_url
     response = client.post(url, data=form_data)

@@ -1,27 +1,20 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.urls import reverse
 
-from notes.models import Note
+from .common import BaseTestClass
 
 
 User = get_user_model()
 
 
-class TestListPage(TestCase):
+class TestListPage(BaseTestClass):
     """
     Класс проверяет наполнение страницы
     для авторизованного и анонимного пользователя.
     """
     @classmethod
     def setUpTestData(cls):
-        # Создаем автора, читателя, и саму заметку.
-        cls.author = User.objects.create(username='admin')
-        cls.reader = User.objects.create(username='no_admin')
-        cls.note = Note.objects.create(title='Заголовок',
-                                       text='Текст',
-                                       slug='zag',
-                                       author=cls.author)
+        super().setUpTestData()
 
     def test_note_in_list(self):
         # Проверяем что у анонимного юзера нет заметок.
@@ -39,7 +32,7 @@ class TestListPage(TestCase):
                 assert (self.note in objets_list) is note_in_list
 
 
-class TestContainForm(TestCase):
+class TestContainForm(BaseTestClass):
     """
     Класс проверяет, что у авторизированного
     пользователя есть форма.
@@ -47,11 +40,7 @@ class TestContainForm(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Создаем автора и саму заметку.
-        cls.author = User.objects.create(username='admin')
-        cls.note = Note.objects.create(title='Заголовок',
-                                       text='Текст',
-                                       slug='zag',
-                                       author=cls.author)
+        super().setUpTestData()
 
     def test_pages_contain_form(self):
         # Проверяем что у авторизированного юзера есть форма.

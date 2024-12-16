@@ -1,16 +1,14 @@
 from http import HTTPStatus
 
-# Импортируем функцию для определения модели пользователя.
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-# Импортируем класс комментария.
 from news.models import Comment, News
-from .constants import (HOME_URL, SIGNUP_URL,
-                        LOGOUT_URL, DETAIL_URL,
-                        LOGIN_URL, DELETE_URL,
-                        EDIT_URL)
+from .constants import (
+    DELETE_URL, DETAIL_URL, EDIT_URL, HOME_URL,
+    LOGIN_URL, LOGOUT_URL, SIGNUP_URL
+)
 
 # Получаем модель пользователя.
 User = get_user_model()
@@ -35,7 +33,7 @@ class TestRoutes(TestCase):
         )
 
     def test_pages_availability(self):
-        # Доступ к основным страницам.
+        """Доступ к основным страницам."""
         urls = (
             (HOME_URL, None),
             (DETAIL_URL, (self.news.id,)),
@@ -51,7 +49,7 @@ class TestRoutes(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_availability_for_comment_edit_and_delete(self):
-        # Проверка на доступ для редактирования и удаления.
+        """Проверка на доступ для редактирования и удаления."""
         users_statuses = (
             (self.author, HTTPStatus.OK),
             (self.reader, HTTPStatus.NOT_FOUND),
@@ -66,7 +64,7 @@ class TestRoutes(TestCase):
                     self.assertEqual(response.status_code, status)
 
     def test_redirect_for_anonymous_client(self):
-        # Проверка на редирект для анонимного пользователя.
+        """Проверка на редирект для анонимного пользователя."""
         login_url = reverse('users:login')
         for name in (EDIT_URL, DELETE_URL):
             with self.subTest(name=name):

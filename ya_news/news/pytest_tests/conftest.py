@@ -1,10 +1,10 @@
-import pytest
 from datetime import datetime, timedelta
 
-from django.test.client import Client
+import pytest
 from django.conf import settings
-from django.utils import timezone
+from django.test.client import Client
 from django.urls import reverse
+from django.utils import timezone
 
 from news.models import Comment, News
 
@@ -134,3 +134,8 @@ def delete_url(get_comment_id):
 def comment_url(detail_url):
     url = detail_url + '#comments'
     return url
+
+
+@pytest.fixture(autouse=True)
+def db_auto_use(db):
+    return db

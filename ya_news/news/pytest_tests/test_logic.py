@@ -1,9 +1,9 @@
-from pytest_django.asserts import assertRedirects, assertFormError
-
 from http import HTTPStatus
 
-from news.models import Comment
+from pytest_django.asserts import assertRedirects, assertFormError
+
 from news.forms import BAD_WORDS, WARNING
+from news.models import Comment
 
 
 def test_anonymous_user_cant_create_comment(client, detail_url, form_data):

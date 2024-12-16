@@ -1,5 +1,4 @@
 import pytest
-
 from django.test.client import Client
 from django.urls import reverse
 
@@ -98,3 +97,8 @@ def logout_url():
 @pytest.fixture
 def signup_url():
     return reverse('users:signup')
+
+
+@pytest.fixture(autouse=True)
+def db_auto_use(db):
+    return db

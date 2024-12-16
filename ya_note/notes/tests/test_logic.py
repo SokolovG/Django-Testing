@@ -1,47 +1,26 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
 from django.urls import reverse
 from pytils.translit import slugify
 
 from notes.models import Note
 from notes.forms import WARNING
-from .contstans import (DETAIL_URl,
-                        LOGIN_URL,
-                        ADD_URL,
-                        SUCCESS_URL,
+from .contstans import (DELETE_URL,
                         EDIT_URL,
-                        DELETE_URL)
-
+                        ADD_URL,
+                        SUCCESS_URL)
+from .common import BaseTestClass
 
 User = get_user_model()
 
 
-class TestNoteCreation(TestCase):
-    NOTE_TEXT = 'Текст заметки'
-    NOTE_TITLE = 'Заметка'
-    NOTE_SLUG = 'zametka'
-
-    NEW_NOTE_TEXT = 'Какой то новый текст'
-    NEW_NOTE_TITLE = 'Новая заметка'
-
+class TestNoteCreation(BaseTestClass):
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='admin')
-        cls.reader = User.objects.create(username=' ne_admin')
-        cls.note = Note.objects.create(title=cls.NOTE_TITLE,
-                                       text=cls.NOTE_TEXT,
-                                       slug=cls.NOTE_SLUG,
-                                       author=cls.author)
-        cls.url = reverse(DETAIL_URl, args=(cls.NOTE_SLUG, ))
-        cls.client_auth = Client()
-        cls.client_auth.force_login(cls.author)
-        cls.not_author_client = Client()
-        cls.not_author_client.force_login(cls.reader)
-        cls.form_data = {'text': cls.NEW_NOTE_TEXT,
-                         'title': cls.NEW_NOTE_TITLE}
-        cls.login_url = reverse(LOGIN_URL)
+        super().setUpTestData()
+        cls.form_data = {'title':cls.NOTE_TITLE,
+                         'text':cls.NOTE_TEXT}
 
     def test_anonymous_user_cant_create_note(self):
         """
@@ -64,29 +43,19 @@ class TestNoteCreation(TestCase):
         self.assertRedirects(response, reverse(SUCCESS_URL))
         self.assertEqual(Note.objects.count(), note_count + 1)
         note = Note.objects.last()
-        self.assertEqual(note.text, self.NEW_NOTE_TEXT)
-        self.assertEqual(note.title, self.NEW_NOTE_TITLE)
+        self.assertEqual(note.text, self.NOTE_TEXT)
+        self.assertEqual(note.title, self.NOTE_TITLE)
         self.assertEqual(note.author, self.author)
 
 
-class TestSlugField(TestCase):
-    NEW_NOTE_TITLE = 'New Text'
-    NOTE_TEXT = 'Текст заметки'
-    NOTE_TITLE = 'Заметка'
-    NOTE_SLUG = 'zametka'
-
+class TestSlugField(BaseTestClass):
+    NEW_NOTE_TEXT = 'Новый текст заметки'
     @classmethod
     def setUpTestData(cls):
-        cls.form_data = {'title': cls.NEW_NOTE_TITLE,
+        super().setUpTestData()
+        cls.form_data = {'title': cls.NEW_NOTE_TEXT,
                          'text': cls.NOTE_TEXT,
                          'slug': cls.NOTE_SLUG}
-        cls.client_auth = Client()
-        cls.author = User.objects.create(username='admin')
-        cls.client_auth.force_login(cls.author)
-        cls.note = Note.objects.create(title=cls.NOTE_TITLE,
-                                       text=cls.NOTE_TEXT,
-                                       slug=cls.NOTE_SLUG,
-                                       author=cls.author)
 
     def test_not_unique_slug(self):
         """
@@ -113,27 +82,14 @@ class TestSlugField(TestCase):
         assert new_note.slug == expected_slug
 
 
-class TestNoteEditDelete(TestCase):
-    NEW_NOTE_TEXT = 'New text'
-    NEW_NOTE_TITLE = 'New Title'
-    NOTE_TEXT = 'Текст заметки'
-    NOTE_TITLE = 'Заметка'
-    NOTE_SLUG = 'zametka'
-
+class TestNoteEditDelete(BaseTestClass):
+    NEW_NOTE_TITLE = 'New title'
+    NEW_NOTE_TEXT = 'New Text'
     @classmethod
     def setUpTestData(cls):
+        super().setUpTestData()
         cls.form_data = {'title': cls.NEW_NOTE_TITLE,
                          'text': cls.NEW_NOTE_TEXT}
-        cls.author = User.objects.create(username='admin')
-        cls.note = Note.objects.create(title=cls.NOTE_TITLE,
-                                       text=cls.NOTE_TEXT,
-                                       slug=cls.NOTE_SLUG,
-                                       author=cls.author)
-        cls.client_auth = Client()
-        cls.client_auth.force_login(cls.author)
-        cls.client_not_auth = Client()
-        cls.reader = User.objects.create(username='ne_admin')
-        cls.client_not_auth.force_login(cls.reader)
 
     def test_author_can_edit_note(self):
         """
@@ -153,15 +109,14 @@ class TestNoteEditDelete(TestCase):
         Тест проверки запрета
         редактирования заметки для читателя.
         """
-        response = self.client_not_auth.post(reverse(EDIT_URL,
-                                                     args=(self.note.slug,)),
-                                             data=self.form_data)
+        response = self.not_author_client.post(reverse(
+            EDIT_URL, args=(self.note.slug,)),
+            data=self.form_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         # self.note.refresh_from_db()
         note_from_db = Note.objects.get(pk=self.note.id)
         self.assertEqual(self.NOTE_TEXT, note_from_db.text)
-        self.assertEqual(self.note.text, self.NOTE_TEXT)
-        self.assertEqual(self.note.title, self.NOTE_TITLE)
+        self.assertEqual(self.NOTE_TITLE, note_from_db.title)
 
     def test_author_can_delete_note(self):
         """
@@ -180,7 +135,8 @@ class TestNoteEditDelete(TestCase):
         удаления заметки для читателя.
         """
         note_count = Note.objects.count()
-        response = self.client_not_auth.delete(reverse(DELETE_URL,
-                                                       args=(self.note.slug,)))
-        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        response = self.not_author_client.delete(
+            reverse(DELETE_URL,
+                    args=(self.note.slug,)))
+        self.assertEqual(response.status_code, self.NOT_FOUND)
         self.assertEqual(Note.objects.count(), note_count)

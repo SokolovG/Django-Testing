@@ -2,13 +2,14 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.utils import timezone
-from django.urls import reverse
 from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
 
 from news.forms import CommentForm
-from news.models import News, Comment
-from .constants import HOME_URL, DETAIL_URL
+from news.models import Comment, News
+
+from .constants import DETAIL_URL, HOME_URL
 
 User = get_user_model()
 
@@ -34,14 +35,14 @@ class TestContent(TestCase):
         News.objects.bulk_create(all_news)
 
     def test_count_news(self):
-        # Подсчитываем количество новостей.
+        """Подсчитываем количество новостей."""
         response = self.client.get(HOME_URL)
         objects_list = response.context['object_list']
         news_count = objects_list.count()
         self.assertEqual(news_count, settings.NEWS_COUNT_ON_HOME_PAGE)
 
     def test_news_order(self):
-        # Проверяем сортировку новостей.
+        """Проверяем сортировку новостей."""
         response = self.client.get(HOME_URL)
         objects_list = response.context['object_list']
         all_dates = [news.date for news in objects_list]
@@ -76,7 +77,7 @@ class TestDetailPage(TestCase):
             comment.save()
 
     def test_comments_order(self):
-        # Проверяем что наши комментарии отсортированы.
+        """Проверяем что наши комментарии отсортированы."""
         response = self.client.get(self.detail_url)
         self.assertIn('news', response.context)
         news = response.context['news']
@@ -86,12 +87,12 @@ class TestDetailPage(TestCase):
         self.assertEqual(all_timestamps, sorted_timestamps)
 
     def test_anonymous_client_has_no_form(self):
-        # Проверяем что у анонимного юзера нет формы.
+        """Проверяем что у анонимного юзера нет формы."""
         response = self.client.get(self.detail_url)
         self.assertNotIn('form', response.context)
 
     def test_authorized_client_has_form(self):
-        # Проверяем что у авторизированного юзера есть форма.
+        """Проверяем что у авторизированного юзера есть форма."""
         self.client.force_login(self.author)
         response = self.client.get(self.detail_url)
         self.assertIn('form', response.context)
